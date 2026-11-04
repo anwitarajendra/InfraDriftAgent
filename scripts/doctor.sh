@@ -52,6 +52,9 @@ check_python312() {
     elif command -v py >/dev/null 2>&1 && py -3.12 --version >/dev/null 2>&1; then
         ver=$(py -3.12 --version 2>&1 | head -n1)
         report_ok "$tool" "$ver (via py -3.12)"
+    elif [ -f "$LOCALAPPDATA/Programs/Python/Python312/python.exe" ]; then
+        ver=$("$LOCALAPPDATA/Programs/Python/Python312/python.exe" --version 2>&1 | head -n1)
+        report_ok "$tool" "$ver (via $LOCALAPPDATA/Programs/Python/Python312/python.exe)"
     elif command -v python3 >/dev/null 2>&1 && [[ "$(python3 -V 2>&1)" =~ 3\.12 ]]; then
         ver=$(python3 --version 2>&1 | head -n1)
         report_ok "$tool" "$ver (via python3)"
@@ -217,11 +220,18 @@ check_gh() {
 # 12. cosign
 check_cosign() {
     local tool="cosign"
+    local bin=""
     if command -v cosign >/dev/null 2>&1; then
+        bin="cosign"
+    elif command -v cosign-windows-amd64 >/dev/null 2>&1; then
+        bin="cosign-windows-amd64"
+    fi
+
+    if [ -n "$bin" ]; then
         local ver
-        ver=$(cosign version 2>&1 | grep -i "GitVersion:" | head -n1 | awk '{print $2}')
+        ver=$($bin version 2>&1 | grep -i "GitVersion:" | head -n1 | awk '{print $2}')
         if [ -z "$ver" ]; then
-            ver=$(cosign version 2>&1 | head -n1)
+            ver=$($bin version 2>&1 | head -n1)
         fi
         report_ok "$tool" "$ver"
     else

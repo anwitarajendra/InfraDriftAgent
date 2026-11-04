@@ -50,6 +50,18 @@ def check_python312():
         if out and "Python 3.12" in out:
             return True, "python3.12", f"{out.splitlines()[0]} (via py -3.12)"
 
+    # 3. Known Windows install paths
+    known_paths = [
+        os.path.expandvars(r"%LOCALAPPDATA%\Programs\Python\Python312\python.exe"),
+        r"C:\Program Files\Python312\python.exe",
+        r"C:\Python312\python.exe",
+    ]
+    for p in known_paths:
+        if os.path.isfile(p):
+            out = run_cmd([p, "--version"])
+            if out and "3.12" in out:
+                return True, "python3.12", f"{out.splitlines()[0]} (via {p})"
+
     # 3. Check default python3 / python
     for py_bin in ["python3", "python"]:
         if shutil.which(py_bin):
@@ -158,13 +170,14 @@ def check_gh():
     return False, "gh", "gh is not installed. Install via: winget install GitHub.cli / brew install gh"
 
 def check_cosign():
-    if shutil.which("cosign"):
-        out = run_cmd(["cosign", "version"])
-        if out:
-            for line in out.splitlines():
-                if "gitversion" in line.lower():
-                    return True, "cosign", line.strip()
-            return True, "cosign", out.splitlines()[0]
+    for bin_name in ["cosign", "cosign-windows-amd64"]:
+        if shutil.which(bin_name):
+            out = run_cmd([bin_name, "version"])
+            if out:
+                for line in out.splitlines():
+                    if "gitversion" in line.lower():
+                        return True, "cosign", line.strip()
+                return True, "cosign", out.splitlines()[0]
     return False, "cosign", "cosign is not installed. Install via: winget install Sigstore.Cosign / brew install cosign"
 
 CHECKS = [
