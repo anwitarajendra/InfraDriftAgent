@@ -121,12 +121,12 @@ def check_helm():
     return False, "helm", "helm is not installed. Install via: winget install Helm.Helm / brew install helm"
 
 def check_opentofu():
-    for bin_name in ["opentofu", "tofu"]:
+    for bin_name in ["tofu", "opentofu"]:
         if shutil.which(bin_name):
             out = run_cmd([bin_name, "--version"])
             if out:
-                return True, "opentofu", out.splitlines()[0]
-    return False, "opentofu", "opentofu is not installed. Install via: winget install OpenTofu.Tofu / brew install opentofu"
+                return True, "OpenTofu", out.splitlines()[0]
+    return False, "OpenTofu", "tofu is not installed. Install via: winget install OpenTofu.Tofu / brew install opentofu"
 
 def check_conftest():
     if shutil.which("conftest"):
